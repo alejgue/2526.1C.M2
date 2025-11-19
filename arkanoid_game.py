@@ -73,10 +73,12 @@ def procesar_input(self) -> None:
 
 @arkanoid_method
 def actualizar_bola(self) -> None:
+    """Actualiza la posición de la bola y gestiona colisiones."""
+    # - Mueve la bola según su velocidad.
     self.ball_pos += self.ball_velocity
-
     ball_rect = self.obtener_rect_bola()
 
+    # - Comprueba colisiones con paredes, paleta y bloques.
     if ball_rect.left <= 0 or ball_rect.right >= self.SCREEN_WIDTH:
         self.ball_velocity.x *= -1
 
@@ -104,10 +106,10 @@ def actualizar_bola(self) -> None:
             nuevos_colores.append(color)
             nuevos_simbolos.append(symbol)
 
+    # - Actualiza velocidad, puntuación y vidas según corresponda.
     self.blocks = nuevos_bloques
     self.block_colors = nuevos_colores
     self.block_symbols = nuevos_simbolos
-
 
 @arkanoid_method
 def dibujar_escena(self) -> None:
