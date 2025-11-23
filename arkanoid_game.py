@@ -59,8 +59,8 @@ def crear_bloques(self) -> None:
     # Recorre `self.layout` para detectar símbolos de bloque.
     bloque_simbolos = self.BLOCK_COLORS.keys()  # Símbolos que representan bloques
     caracteres_validos = bloque_simbolos | {"."}
-    for fila, conjunto_caracter in enumerate(self.layout, start=1):
-        for columna, caracter in enumerate(conjunto_caracter, start=1): 
+    for fila, conjunto_caracter in enumerate(self.layout, start=0):
+        for columna, caracter in enumerate(conjunto_caracter, start=0): 
             if caracter not in caracteres_validos:
                 raise ValueError(
                     f"Carácter '{caracter}' no definido "
@@ -198,6 +198,10 @@ def dibujar_escena(self) -> None:
         alto = self.SCREEN_HEIGHT // 2
         self.dibujar_texto(self.end_message, (ancho - 80, alto - 20), grande=True)
 
+#@arkanoid_method
+#def musica_y_sonidos(self) -> None:
+#    pass
+
 @arkanoid_method
 def run(self) -> None:
     """Ejecuta el bucle principal del juego."""
@@ -215,6 +219,7 @@ def run(self) -> None:
                 self.running = False
             elif event.type == self.EVENT_KEYDOWN and event.key == self.KEY_ESCAPE:
                 self.running = False
+        
 
         # Entrada del jugador
         self.procesar_input()

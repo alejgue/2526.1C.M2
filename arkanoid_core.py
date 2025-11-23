@@ -27,7 +27,7 @@ class ArkanoidGame:
     """Contenedor con la lógica común del Arkanoid simplificado."""
 
     # Configuración visual y de juego
-    SCREEN_WIDTH: int = 800
+    SCREEN_WIDTH: int = 850
     SCREEN_HEIGHT: int = 600
     FPS: int = 60
 
@@ -95,6 +95,7 @@ class ArkanoidGame:
         self.clock: pygame.time.Clock | None = None
         self._font_small: pygame.font.Font | None = None
         self._font_big: pygame.font.Font | None = None
+        self.music_volume: float = 0.2
 
     # ------------------------------------------------------------------ #
     # Métodos auxiliares ya implementados para el hito
