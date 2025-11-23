@@ -163,6 +163,14 @@ def actualizar_bola(self) -> None:
     self.block_colors = nuevos_colores
     self.block_symbols = nuevos_simbolos
 
+    if self.lives <= 0:
+        self.end_message = "GAME OVER"
+        # Dibujar escena con el mensaje
+        self.dibujar_escena()
+        self.actualizar_pantalla()
+        self.esperar(3000)  # pausa 3 segundos
+        self.running = False
+
 @arkanoid_method
 def dibujar_escena(self) -> None:
     """Renderiza fondo, bloques, paleta, bola y HUD."""
@@ -182,6 +190,13 @@ def dibujar_escena(self) -> None:
     # HUD: puntuación y vidas
     self.dibujar_texto(f"Puntos: {self.score}", (10, 10))
     self.dibujar_texto(f"Vidas: {self.lives}", (10, 40))
+    # Actualiza pantalla aquí para asegurarse de que se dibuje antes de la siguiente iteración
+    self.actualizar_pantalla()
+
+    if self.end_message:
+        ancho = self.SCREEN_WIDTH // 2
+        alto = self.SCREEN_HEIGHT // 2
+        self.dibujar_texto(self.end_message, (ancho - 80, alto - 20), grande=True)
 
 @arkanoid_method
 def run(self) -> None:
