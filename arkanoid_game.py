@@ -123,27 +123,25 @@ def actualizar_bola(self) -> None:
         return
 
     if ball_rect.colliderect(self.paddle):
-        if ball_rect.colliderect(self.paddle):
+        # Invierte la dirección vertical (rebota hacia arriba)
+        self.ball_velocity.y = -abs(self.ball_velocity.y)
         
-            # Invierte la dirección vertical (rebota hacia arriba)
-            self.ball_velocity.y = -abs(self.ball_velocity.y)
+        # Calcula el factor de impacto relativo (-1.0 a 1.0)
+        # Esto determina la nueva dirección horizontal
+        impacto_relativo = (self.ball_pos.x - self.paddle.centerx) / (self.paddle.width / 2)
         
-            # Calcula el factor de impacto relativo (-1.0 a 1.0)
-            # Esto determina la nueva dirección horizontal
-            impacto_relativo = (self.ball_pos.x - self.paddle.centerx) / (self.paddle.width / 2)
+        # Crea el nuevo vector de velocidad y normaliza
+        # Se usa un nuevo Vector2 para que la magnitud total (longitud) sea constante
+        nueva_direccion = Vector2(impacto_relativo, -1.0) # -1.0 fuerza el movimiento vertical hacia arriba
         
-            # Crea el nuevo vector de velocidad y normaliza
-            # Se usa un nuevo Vector2 para que la magnitud total (longitud) sea constante
-            nueva_direccion = Vector2(impacto_relativo, -1.0) # -1.0 fuerza el movimiento vertical hacia arriba
-        
-            # Normaliza el vector para que tenga una longitud de 1
-            # y luego multiplica por la velocidad base (self.BALL_SPEED)
-            if nueva_direccion.length_squared() > 0:
+        # Normaliza el vector para que tenga una longitud de 1
+        # y luego multiplica por la velocidad base (self.BALL_SPEED)
+        if nueva_direccion.length_squared() > 0:
                 self.ball_velocity = nueva_direccion.normalize() * self.BALL_SPEED
         
-            # Asegura que la bola no se quede "pegada" si choca en la parte superior
-            if ball_rect.bottom > self.paddle.top:
-                self.ball_pos.y = self.paddle.top - self.BALL_RADIUS
+        # Asegura que la bola no se quede "pegada" si choca en la parte superior
+        if ball_rect.bottom > self.paddle.top:
+            self.ball_pos.y = self.paddle.top - self.BALL_RADIUS
 
     nuevos_bloques = []
     nuevos_colores = []
@@ -153,6 +151,7 @@ def actualizar_bola(self) -> None:
         if ball_rect.colliderect(rect):
             self.ball_velocity.y *= -1
             self.score += self.BLOCK_POINTS[symbol]
+        #elif 
         else:
             nuevos_bloques.append(rect)
             nuevos_colores.append(color)
@@ -172,14 +171,36 @@ def actualizar_bola(self) -> None:
         self.running = False
 
 @arkanoid_method
+def dibujar_bloque_con_borde(self, rect: pygame.Rect, color: tuple[int, int, int]) -> None:
+    """Dibuja un bloque con un borde negro simple."""
+    
+    GROSOR_BORDE = 3           # Define el grosor del borde en píxeles
+    COLOR_BORDE = (0, 0, 0)  # Negro
+    
+    # 1. Dibujar el rectángulo exterior (el borde) con el color negro
+    self.dibujar_rectangulo(rect, COLOR_BORDE)
+    
+    # 2. Crear el rectángulo interior (cuerpo)
+    # .inflate() reduce el rectángulo en el doble del grosor del borde
+    cuerpo_rect = rect.inflate(-GROSOR_BORDE * 2, -GROSOR_BORDE * 2)
+    
+    # 3. Dibujar el cuerpo interior con el color original del bloque
+    self.dibujar_rectangulo(cuerpo_rect, color)
+
+@arkanoid_method
 def dibujar_escena(self) -> None:
     """Renderiza fondo, bloques, paleta, bola y HUD."""
     # Fondo
-    self.screen.fill(self.BACKGROUND_COLOR)
+    if self.background_img and self.screen:
+        # Dibuja la imagen en la posición (0, 0)
+        self.screen.blit(self.background_img, (0, 0))
+    else:
+        # Fondo (fallback si la imagen falla)
+        self.screen.fill(self.BACKGROUND_COLOR)
 
     # Bloques
     for rect, color in zip(self.blocks, self.block_colors):
-        self.dibujar_rectangulo(rect, color)
+        self.dibujar_bloque_con_borde(rect, color)
 
     # Paleta
     self.dibujar_rectangulo(self.paddle, self.PADDLE_COLOR)
@@ -197,10 +218,28 @@ def dibujar_escena(self) -> None:
         ancho = self.SCREEN_WIDTH // 2
         alto = self.SCREEN_HEIGHT // 2
         self.dibujar_texto(self.end_message, (ancho - 80, alto - 20), grande=True)
+        self.game_over_sound = pygame.mixer.Sound("others//Game_over.mp3")
+        self.game_over_sound.set_volume(100)
+        pygame.mixer.music.stop()
+        pygame.mixer.quit()
 
-#@arkanoid_method
-#def musica_y_sonidos(self) -> None:
-#    pass
+@arkanoid_method
+def cargar_audio_y_fondo(self) -> None:
+    # Carga la imagen(fondo)
+    img = pygame.image.load("others//background1-2.png").convert() 
+        
+    # Redimensionar la imagen al tamaño de la pantalla
+    self.background_img = pygame.transform.scale(
+        img, 
+        (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+    )
+    pygame.mixer.music.load("others//level_1-2.mp3")
+    pygame.mixer.music.set_volume(self.music_volume)
+    pygame.mixer.music.play(loops=-1)
+        #self.music_level_3_4 = pygame.mixer.music.load("level_3-4.mp3")
+        #self.music_level_5 = pygame.mixer.music.load("level_5.mp3")
+        
+    
 
 @arkanoid_method
 def run(self) -> None:
@@ -210,7 +249,9 @@ def run(self) -> None:
     self.cargar_nivel()
     self.preparar_entidades()
     self.crear_bloques()
+    self.cargar_audio_y_fondo()
     self.running = True
+    
 
     while self.running:
         # Procesar eventos
