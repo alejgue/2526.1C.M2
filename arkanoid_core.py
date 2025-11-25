@@ -27,7 +27,7 @@ class ArkanoidGame:
     """Contenedor con la lógica común del Arkanoid simplificado."""
 
     # Configuración visual y de juego
-    SCREEN_WIDTH: int = 800
+    SCREEN_WIDTH: int = 850
     SCREEN_HEIGHT: int = 600
     FPS: int = 60
 
@@ -95,6 +95,15 @@ class ArkanoidGame:
         self.clock: pygame.time.Clock | None = None
         self._font_small: pygame.font.Font | None = None
         self._font_big: pygame.font.Font | None = None
+        self.background_img: pygame.Surface | None = None
+
+        # Sonido y musica
+        self.music_volume: float = 0.2
+        self.collision_sound: pygame.mixer.Sound | None = None
+        self.next_level_sound: pygame.mixer.Sound | None = None
+        self.game_start_sound: pygame.mixer.Sound | None = None
+        self.game_over_sound: pygame.mixer.Sound | None = None
+        self.game_won_sound: pygame.mixer.Sound | None = None
 
     # ------------------------------------------------------------------ #
     # Métodos auxiliares ya implementados para el hito
@@ -134,9 +143,10 @@ class ArkanoidGame:
             return
 
         # Permite ejecutar en entornos sin servidor gráfico (tests/CI).
-        if "SDL_VIDEODRIVER" not in os.environ and not os.environ.get("DISPLAY"):
-            os.environ["SDL_VIDEODRIVER"] = "dummy"
+        #if "SDL_VIDEODRIVER" not in os.environ and not os.environ.get("DISPLAY"):
+        #    os.environ["SDL_VIDEODRIVER"] = "dummy"
 
+        pygame.mixer.init()
         pygame.init()
         pygame.display.set_caption("Arkanoid M2")
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -237,9 +247,18 @@ class ArkanoidGame:
     def actualizar_bola(self) -> None:
         raise NotImplementedError
 
+    def dibujar_bloque_con_borde(self) -> None:
+        raise NotImplementedError
+
     def dibujar_escena(self) -> None:
         raise NotImplementedError
 
+    def cargar_audio_y_fondo(self) -> None:
+        raise NotImplementedError
+        
+    def pantalla_fin(self) -> None:
+        raise NotImplementedError
+    
     def run(self) -> None:
         raise NotImplementedError
 
