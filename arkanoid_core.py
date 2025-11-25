@@ -167,6 +167,7 @@ class ArkanoidGame:
 
         if not self._font_small:
             self._font_small = pygame.font.Font(None, 26)
+            self._font_small.bold = True
         return self._font_small
 
     def dibujar_texto(self, texto: str, posicion: tuple[int, int], grande: bool = False) -> None:
