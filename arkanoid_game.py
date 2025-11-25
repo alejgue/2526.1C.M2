@@ -163,12 +163,7 @@ def actualizar_bola(self) -> None:
     self.block_symbols = nuevos_simbolos
 
     if self.lives <= 0:
-        self.end_message = "GAME OVER"
-        # Dibujar escena con el mensaje
-        self.dibujar_escena()
-        self.actualizar_pantalla()
-        self.esperar(3000)  # pausa 3 segundos
-        self.running = False
+        self.pantalla_fin("GAME OVER")
 
 @arkanoid_method
 def dibujar_bloque_con_borde(self, rect: pygame.Rect, color: tuple[int, int, int]) -> None:
@@ -236,10 +231,80 @@ def cargar_audio_y_fondo(self) -> None:
     pygame.mixer.music.load("others//level_1-2.mp3")
     pygame.mixer.music.set_volume(self.music_volume)
     pygame.mixer.music.play(loops=-1)
-        #self.music_level_3_4 = pygame.mixer.music.load("level_3-4.mp3")
+    self.music_level_3_4 = pygame.mixer.music.load("8-bit-retro-game-music-233964.mp3")
         #self.music_level_5 = pygame.mixer.music.load("level_5.mp3")
-        
-    
+
+
+@arkanoid_method
+def pantalla_fin(self, mensaje: str) -> None:
+    """Pantalla simple de fin: muestra mensaje, Retry y Next Level."""
+    fuente = pygame.font.SysFont(None, 60)
+    fuente_btn = pygame.font.SysFont(None, 40)
+
+    clock = pygame.time.Clock()
+
+    # Crear los textos
+    txt_mensaje = fuente.render(mensaje, True, (255, 255, 255))
+    txt_retry = fuente_btn.render("Retry", True, (255, 255, 255))
+    txt_next = fuente_btn.render("Next Level", True, (255, 255, 255))
+
+    # Rectángulos de botones
+    retry_rect = pygame.Rect(self.SCREEN_WIDTH//2 - 120, self.SCREEN_HEIGHT//2, 240, 50)
+    next_rect = pygame.Rect(self.SCREEN_WIDTH//2 - 120, self.SCREEN_HEIGHT//2 + 70, 240, 50)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+                return
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if retry_rect.collidepoint(event.pos):
+                    # Reiniciar este nivel
+                    self.preparar_entidades()
+                    self.crear_bloques()
+                    return
+
+                if next_rect.collidepoint(event.pos):
+                    # Pasar al siguiente nivel directamente
+                    actual = self.level_path
+                    try:
+                        n = int(actual.stem.split("_")[-1])
+                        siguiente = actual.with_name(f"level_{n+1}.txt")
+                        if siguiente.exists():
+                            self.level_path = siguiente
+                            self.cargar_nivel()
+                            self.preparar_entidades()
+                            self.crear_bloques()
+                        else:
+                            print("No existe el siguiente nivel.")
+                        return
+                    except:
+                        print("Nombre de nivel no soportado.")
+                        return
+
+        # Fondo negro
+        self.screen.fill((0, 0, 0))
+
+        # Mensaje centrado
+        self.screen.blit(
+            txt_mensaje,
+            (self.SCREEN_WIDTH//2 - txt_mensaje.get_width()//2, self.SCREEN_HEIGHT//3)
+        )
+
+        # Botón Retry
+        pygame.draw.rect(self.screen, (80, 80, 80), retry_rect)
+        self.screen.blit(txt_retry, (retry_rect.x + 70, retry_rect.y + 10))
+
+        # Botón Next Level
+        pygame.draw.rect(self.screen, (80, 80, 80), next_rect)
+        self.screen.blit(txt_next, (next_rect.x + 40, next_rect.y + 10))
+
+        pygame.display.flip()
+        clock.tick(30)
+
+
+
 
 @arkanoid_method
 def run(self) -> None:
