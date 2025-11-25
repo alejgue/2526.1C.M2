@@ -9,7 +9,7 @@ from arkanoid_core import *
 # Métodos a completar por el alumnado
 # --------------------------------------------------------------------- #
 
-#@arkanoid_method
+@arkanoid_method
 def cargar_nivel(self) -> list[str]:    #YOOOOOYOOOOO
     """Lee el fichero de nivel y devuelve la cuadrícula como lista de filas."""
     ruta_fichero_nivel = self.level_path
@@ -91,16 +91,21 @@ def actualizar_bola(self) -> None:
         return
 
     if ball_rect.colliderect(self.paddle):
+        ball_rect.bottom = self.paddle.top
+        self.ball_pos.y = ball_rect.centery
         self.ball_velocity.y = -abs(self.ball_velocity.y)
+        ball_rect = self.obtener_rect_bola()
 
     nuevos_bloques = []
     nuevos_colores = []
     nuevos_simbolos = []
+    colision_bloque = False
 
     for rect, color, symbol in zip(self.blocks, self.block_colors, self.block_symbols):
-        if ball_rect.colliderect(rect):
+        if not colision_bloque and ball_rect.colliderect(rect):
             self.ball_velocity.y *= -1
             self.score += self.BLOCK_POINTS[symbol]
+            colision_bloque = True
         else:
             nuevos_bloques.append(rect)
             nuevos_colores.append(color)
