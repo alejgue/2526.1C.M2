@@ -42,7 +42,7 @@ class ArkanoidGame:
 
     # Bola
     BALL_RADIUS = 10
-    BALL_SPEED = 6.0
+    BALL_SPEED = 9.0
 
     # Bloques
     BLOCK_WIDTH = 60

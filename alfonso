@@ -1,11 +1,11 @@
 @arkanoid_method
 def actualizar_bola(self) -> None:
     """Actualiza la posición de la bola y gestiona colisiones."""
-    # - Mueve la bola según su velocidad.
+    # Mueve la bola según su velocidad.
     self.ball_pos += self.ball_velocity
     ball_rect = self.obtener_rect_bola()
 
-    # - Comprueba colisiones con paredes, paleta y bloques.
+    # Comprueba colisiones con paredes, paleta y bloques.
     if ball_rect.left <= 0 or ball_rect.right >= self.SCREEN_WIDTH:
         self.ball_velocity.x *= -1
 
@@ -17,11 +17,10 @@ def actualizar_bola(self) -> None:
         self.reiniciar_bola()
         return
 
-    if ball_rect.colliderect(self.paddle):
-        ball_rect.bottom = self.paddle.top
-        self.ball_pos.y = ball_rect.centery
-        self.ball_velocity.y = -abs(self.ball_velocity.y)
-        ball_rect = self.obtener_rect_bola()
+    if ball_rect.colliderect(self.paddle) and self.ball_velocity.y > 0:
+        angulo = rnd.uniform(-70, 70)
+        direccion = Vector2(0, -1).rotate(angulo)
+        self.ball_velocity = direccion.normalize() * self.BALL_SPEED
 
     nuevos_bloques = []
     nuevos_colores = []
@@ -32,13 +31,15 @@ def actualizar_bola(self) -> None:
         if not colision_bloque and ball_rect.colliderect(rect):
             self.ball_velocity.y *= -1
             self.score += self.BLOCK_POINTS[symbol]
-            colision_bloque = True
         else:
             nuevos_bloques.append(rect)
             nuevos_colores.append(color)
             nuevos_simbolos.append(symbol)
 
-    # - Actualiza velocidad, puntuación y vidas según corresponda.
+    # Actualiza velocidad, puntuación y vidas según corresponda.
     self.blocks = nuevos_bloques
     self.block_colors = nuevos_colores
     self.block_symbols = nuevos_simbolos
+
+    if self.lives <= 0:
+        self.pantalla_fin("GAME OVER")

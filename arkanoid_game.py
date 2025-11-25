@@ -124,7 +124,7 @@ def actualizar_bola(self) -> None:
         return
 
     if ball_rect.colliderect(self.paddle) and self.ball_velocity.y > 0:
-        angulo = rnd.uniform(-45, 45)
+        angulo = rnd.uniform(-70, 70)
         direccion = Vector2(0, -1).rotate(angulo)
         self.ball_velocity = direccion.normalize() * self.BALL_SPEED
 
