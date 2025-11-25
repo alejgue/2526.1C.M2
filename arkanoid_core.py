@@ -255,7 +255,10 @@ class ArkanoidGame:
 
     def cargar_audio_y_fondo(self) -> None:
         raise NotImplementedError
-
+        
+    def pantalla_fin(self) -> None:
+        raise NotImplementedError
+    
     def run(self) -> None:
         raise NotImplementedError
 
