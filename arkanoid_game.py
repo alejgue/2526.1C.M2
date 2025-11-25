@@ -5,6 +5,7 @@ estructura de la clase. El objetivo es construir un prototipo jugable usando
 pygame que cargue bloques desde un fichero de nivel basado en caracteres.
 """
 from arkanoid_core import ArkanoidGame, arkanoid_method, pygame, Vector2
+import random as rnd
 # --------------------------------------------------------------------- #
 # Métodos a completar por el alumnado
 # --------------------------------------------------------------------- #
@@ -43,7 +44,7 @@ def preparar_entidades(self) -> None:
     
     # - Reinicia `self.score`, `self.lives` y `self.end_message`.
     self.score = 0
-    self.lives = 3
+    self.lives = 3  
     self.end_message = ""
 
     # - Llama a `self.reiniciar_bola()` para colocar la bola sobre la paleta.
@@ -122,8 +123,10 @@ def actualizar_bola(self) -> None:
         self.reiniciar_bola()
         return
 
-    if ball_rect.colliderect(self.paddle):
-        self.ball_velocity.y = -abs(self.ball_velocity.y)
+    if ball_rect.colliderect(self.paddle) and self.ball_velocity.y > 0:
+        angulo = rnd.uniform(-45, 45)
+        direccion = Vector2(0, -1).rotate(angulo)
+        self.ball_velocity = direccion.normalize() * self.BALL_SPEED
 
     nuevos_bloques = []
     nuevos_colores = []
@@ -213,7 +216,6 @@ def cargar_audio_y_fondo(self) -> None:
     pygame.mixer.music.load("others//level_1-2.mp3")
     pygame.mixer.music.set_volume(self.music_volume)
     pygame.mixer.music.play(loops=-1)
-    self.music_level_3_4 = pygame.mixer.music.load("8-bit-retro-game-music-233964.mp3")
         #self.music_level_5 = pygame.mixer.music.load("level_5.mp3")
 
 
