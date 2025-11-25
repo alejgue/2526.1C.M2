@@ -45,62 +45,19 @@ Completa los métodos marcados con `TODO` siguiendo el orden propuesto y respeta
 
 1. **`cargar_nivel`** *(1 punto)*  
    Lee el fichero indicado en `level_path` y devuelve la cuadrícula como una lista de cadenas. Debes validar que el fichero existe y que todas las filas tienen la misma longitud.  
-   *Pistas:* `Path.read_text` (lee el fichero completo como texto), `splitlines()` (separa en filas), control de excepciones y comprobación de anchura con `len`.
-   Defensa:
-   Esta función se encarga de leer el archivo de nivel indicado en self.level_path y transformarlo en una cuadrícula válida para el juego.
-   Función:
-   -Comprueba que la ruta proporcionada corresponde a un archivo existente.
-   -Lee el contenido completo del fichero utilizando read().
-   -Divide el texto en líneas con splitlines(), eliminando líneas vacías.
-   -Valida que todas las filas tengan la misma longitud; si no, lanza un error.
-   -Asigna el resultado a self.layout y lo devuelve.
-   Resultado:
-   El nivel queda representado internamente como una lista de cadenas, donde cada carácter define un tipo de bloque o una celda vacía.
+   *Pistas:* `Path.read_text` (lee el fichero completo como texto), `splitlines()` (separa en filas), control de excepciones y comprobación de anchura con `len`. 
 
 2. **`preparar_entidades`** *(1 punto)*  
    Inicializa la paleta, la bola y las variables de puntuación/vidas. La paleta debe aparecer centrada en la parte inferior y la bola justo encima, lista para salir disparada.  
    *Pistas:* usa `self.crear_rect` para configurar la paleta, `Vector2` para la bola y llama a `self.reiniciar_bola()` para dejarla lista sobre la paleta.
-   Defensa:
-   Esta función inicializa los elementos principales del juego antes de comenzar la partida.
-   Función:
-   -Crea la paleta usando self.crear_rect() con las dimensiones definidas en la configuración.
-   -Centra la paleta en la parte inferior de la pantalla usando midbottom.
-   -Reinicia las variables de estado del juego: self.score, self.livesy `yo mismoself.end_message.
-   -Llama a self.reiniciar_bola() para colocar la bola justo encima de la paleta con su velocidad inicial.
-   Resultado:
-   El juego queda en estado inicial: paleta centrada, bola preparada para salir y contador de puntos y vidas reiniciado.
 
 3. **`crear_bloques`** *(1.5 puntos)*  
    A partir de la cuadrícula generada en el paso 1, crea los rectángulos de `pygame` que representarán los bloques. Almacénalos en `self.blocks` junto con la información necesaria para dibujarlos (color, puntuación, etc.).  
    *Pistas:* apóyate en `self.calcular_posicion_bloque` para obtener cada `Rect` y rellena las listas `self.blocks`, `self.block_colors` y `self.block_symbols`.
-   Defensa:
-   Esta función analiza la cuadrícula cargada previamente y genera los bloques que se renderizarán en pantalla.
-   Función:
-   -Limpia las listas self.blocks, self.block_colorsy `self.b_self.block_symbols.
-   -Recorre cada fila y columna de self.layout.
-   -Ignora el carácter . y valida que no existan símbolos no reconocidos.
-   -Para cada símbolo de bloque (#, @, %):
-   --Calcula su posición en pantalla mediante self.calcular_posicion_bloque().
-   --Añade el rectángulo resultante a self.blocks.
-   --Añade su color correspondiente a self.block_colors.
-   --Registra el símbolo en self.block_symbols para gestionar la puntuación.
-   Resultado:
-   Los bloques quedan generados y listos para ser dibujados y colisionados durante el juego.
 
 4. **`procesar_input`** *(2 puntos)*  
    Gestiona la entrada del usuario moviendo la paleta. Debes contemplar las teclas de dirección izquierda/derecha (o `A/D`) y mantener la paleta dentro de los límites de la pantalla.  
    *Pistas:* obtén el estado de teclado con `self.obtener_estado_teclas()` y utiliza las constantes `self.KEY_LEFT`, `self.KEY_RIGHT`, `self.KEY_A`, `self.KEY_D`. Ajusta `self.paddle.x` respetando los límites de la pantalla.
-   Defensa:
-   Esta función gestiona la entrada del usuario para controlar el movimiento de la paleta.
-   Función:
-   -Obtiene el estado del teclado mediante self.obtener_estado_teclas().
-   -Detecta la pulsación de las teclas de movimiento:
-   --Izquierda: KEY_LEFT o KEY_A.
-   --Derecha: KEY_RIGHT o KEY_D.
-   -Actualiza la posición horizontal de la paleta utilizando self.PADDLE_SPEED.
-   -Aplica límites para evitar que la paleta pueda salir de la pantalla.
-   Resultado:
-   La paleta se mueve a la izquierda o a la derecha solo cuando el usuario mantiene pulsadas las teclas correspondientes, y nunca puede salirse de los límites de la pantalla.
 
 5. **`actualizar_bola`** *(2 puntos)*  
    Calcula el movimiento de la bola en cada fotograma, aplicando una velocidad inicial y rebotes con paredes, paleta y bloques. Cuando impacte contra un bloque, elimínalo y suma la puntuación correspondiente.  
