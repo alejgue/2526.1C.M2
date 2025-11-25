@@ -9,7 +9,7 @@ from arkanoid_core import ArkanoidGame, arkanoid_method, pygame, Vector2
 # Métodos a completar por el alumnado
 # --------------------------------------------------------------------- #
 
-#@arkanoid_method
+@arkanoid_method
 def cargar_nivel(self) -> list[str]:    #YOOOOOYOOOOO
     """Lee el fichero de nivel y devuelve la cuadrícula como lista de filas."""
     ruta_fichero_nivel = self.level_path
