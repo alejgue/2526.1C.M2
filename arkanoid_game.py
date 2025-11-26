@@ -5,55 +5,57 @@ estructura de la clase. El objetivo es construir un prototipo jugable usando
 pygame que cargue bloques desde un fichero de nivel basado en caracteres.
 """
 from arkanoid_core import ArkanoidGame, arkanoid_method, pygame, Vector2
-import random as rnd
 # --------------------------------------------------------------------- #
 # Métodos a completar por el alumnado
 # --------------------------------------------------------------------- #
 
+
 @arkanoid_method
-def cargar_nivel(self) -> list[str]:   
+def cargar_nivel(self) -> list[str]:
     """Lee el fichero de nivel y devuelve la cuadrícula como lista de filas."""
     # Comprueba que `self.level_path` existe y es fichero.
     ruta_fichero_nivel = self.level_path
 
     if not ruta_fichero_nivel.is_file():
         raise FileNotFoundError(
-        f"El archivo de nivel no se encuentra: {ruta_fichero_nivel}"
-    )  
+            f"El archivo de nivel no se encuentra: {ruta_fichero_nivel}"
+        )
 
-    # Lee su contenido, filtra líneas vacías y valida que todas tienen el mismo ancho.
+    # Lee su contenido, filtra líneas vacías y valida que todas tienen el
+    # mismo ancho.
     with ruta_fichero_nivel.open("r", encoding="utf-8") as f:
-       texto_entero = f.read()   
+        texto_entero = f.read()
 
-       # Obtiene las lineas sin espacios y las separa
-       lineas = [
-           linea.strip() 
-           for linea in texto_entero.splitlines() 
-           if linea.strip()
-       ]  
+        # Obtiene las lineas sin espacios y las separa
+        lineas = [
+            linea.strip()
+            for linea in texto_entero.splitlines()
+            if linea.strip()
+        ]
 
-       # Comprueba el ancho de las lineas
-       longitudes = [len(linea) for linea in lineas]  
-       if len(set(longitudes)) > 1:   
-           raise ValueError("Las filas del nivel no tienen el mismo ancho")  
-       
+        # Comprueba el ancho de las lineas
+        longitudes = [len(linea) for linea in lineas]
+        if len(set(longitudes)) > 1:
+            raise ValueError("Las filas del nivel no tienen el mismo ancho")
+
     # Guarda el resultado en `self.layout` y devuélvelo.
     self.layout = lineas
     return self.layout
-    
-   
+
 
 @arkanoid_method
 def preparar_entidades(self, reiniciar_score: bool = False) -> None:
     """Posiciona paleta y bola, y reinicia puntuación y vidas."""
     # Ajusta el tamaño de `self.paddle` y céntrala usando `midbottom`.
     self.paddle = self.crear_rect(0, 0, *self.PADDLE_SIZE)
-    self.paddle.midbottom = (self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT - self.PADDLE_OFFSET)
-    
+    self.paddle.midbottom = (
+        self.SCREEN_WIDTH // 2,
+        self.SCREEN_HEIGHT - self.PADDLE_OFFSET)
+
     # Reinicia `self.score`, `self.lives` y `self.end_message`.
     if reiniciar_score:
         self.score = 0
-    self.lives = 3  
+    self.lives = 3
     self.end_message = ""
 
     # Llama a `self.reiniciar_bola()` para colocar la bola sobre la paleta.
@@ -69,36 +71,38 @@ def crear_bloques(self) -> None:
     self.block_symbols.clear()
 
     # Recorre `self.layout` para detectar símbolos de bloque.
-    bloque_simbolos = self.BLOCK_COLORS.keys()  # Símbolos que representan bloques
+    bloque_simbolos = self.BLOCK_COLORS.keys()  # Símbolos de bloques
     caracteres_validos = bloque_simbolos | {"."}
     for fila, conjunto_caracter in enumerate(self.layout, start=0):
-        for columna, caracter in enumerate(conjunto_caracter, start=0): 
+        for columna, caracter in enumerate(conjunto_caracter, start=0):
             if caracter not in caracteres_validos:
                 raise ValueError(
                     f"Carácter '{caracter}' no definido "
                     "en el archivo de nivel."
                 )
-            
+
             if caracter == ".":
                 continue
 
-            # Usa `self.calcular_posicion_bloque` y rellena las listas paralelas.
+            # Usa `self.calcular_posicion_bloque` y rellena las listas
+            # paralelas.
             if caracter in bloque_simbolos:
-                rectangulo = self.calcular_posicion_bloque(fila, columna)  
-                self.blocks.append(rectangulo) 
+                rectangulo = self.calcular_posicion_bloque(fila, columna)
+                self.blocks.append(rectangulo)
                 self.block_colors.append(self.BLOCK_COLORS[caracter])
                 self.block_symbols.append(caracter)
-    
+
 
 @arkanoid_method
 def procesar_input(self) -> None:
     """Gestiona la entrada de teclado para mover la paleta."""
     # Obtén el estado de teclas con `self.obtener_estado_teclas()`.
     movimiento = 0
-    velocidad = self.PADDLE_SPEED 
+    velocidad = self.PADDLE_SPEED
     teclas = self.obtener_estado_teclas()
 
-    # Desplaza la paleta con `self.PADDLE_SPEED` si se pulsan las teclas izquierda/derecha.
+    # Desplaza la paleta con `self.PADDLE_SPEED` si se pulsan las teclas
+    # izquierda/derecha.
     if teclas[self.KEY_LEFT] or teclas[self.KEY_A]:
         movimiento = -velocidad
     elif teclas[self.KEY_RIGHT] or teclas[self.KEY_D]:
@@ -106,7 +110,7 @@ def procesar_input(self) -> None:
 
     # - Mover la paleta
     if movimiento != 0:
-        self.paddle.x  += movimiento
+        self.paddle.x += movimiento
 
         # - Limitar movimiento de la paleta para que no salga de la pantalla
         if self.paddle.x < 0:
@@ -121,7 +125,7 @@ def actualizar_bola(self) -> None:
     # Mueve la bola según su velocidad.
     self.ball_pos += self.ball_velocity
     ball_rect = self.obtener_rect_bola()
-    
+
     # Gestiona colisiones con paredes, paleta y bloques.
     if ball_rect.left <= 0:
         self.ball_velocity.x *= -1
@@ -146,7 +150,8 @@ def actualizar_bola(self) -> None:
         self.ball_pos.y = self.paddle.top - ball_rect.height / 2 - 1
         ball_rect = self.obtener_rect_bola()
 
-        distancia_relativa = (ball_rect.centerx - self.paddle.centerx) / (self.paddle.width / 2)
+        distancia_relativa = (ball_rect.centerx -
+                              self.paddle.centerx) / (self.paddle.width / 2)
         distancia_relativa = max(-1, min(1, distancia_relativa))
 
         MAX_ANGULO = 60
@@ -161,13 +166,14 @@ def actualizar_bola(self) -> None:
     nuevos_simbolos = []
     colision_bloque = False
 
-    for rect, color, symbol in zip(self.blocks, self.block_colors, self.block_symbols):
+    for rect, color, symbol in zip(
+            self.blocks, self.block_colors, self.block_symbols):
         if not colision_bloque and ball_rect.colliderect(rect):
             self.ball_velocity.y *= -1
             colision_bloque = True
             if symbol == "@":
                 self.score += self.BLOCK_POINTS[symbol]
-                
+
                 # Definir el estado degradado y se mantiene el bloque
                 simbolo_degradado = "#"
                 color_degradado = self.BLOCK_COLORS[simbolo_degradado]
@@ -177,7 +183,7 @@ def actualizar_bola(self) -> None:
             else:
                 # Se destruye el bloque normal
                 self.score += self.BLOCK_POINTS[symbol]
-                
+
         else:
             # Bloque sin colision
             nuevos_bloques.append(rect)
@@ -193,7 +199,7 @@ def actualizar_bola(self) -> None:
         self.end_message = "GAME OVER"
         self.pantalla_fin(self.end_message)
         return
-    
+
     if len(self.blocks) == 0:
         if self.level_path.name == "level_5.txt":
             self.end_message = "¡JUEGO TERMINADO! ¡Gracias por jugar!"
@@ -205,19 +211,20 @@ def actualizar_bola(self) -> None:
 
 
 @arkanoid_method
-def dibujar_bloque_con_borde(self, rect: pygame.Rect, color: tuple[int, int, int]) -> None:
+def dibujar_bloque_con_borde(
+        self, rect: pygame.Rect, color: tuple[int, int, int]) -> None:
     """Dibuja un bloque con un borde negro simple."""
-    
-    GROSOR_BORDE = 3          
-    COLOR_BORDE = (0, 0, 0)  
-    
+
+    GROSOR_BORDE = 3
+    COLOR_BORDE = (0, 0, 0)
+
     # Dibujar el rectángulo exterior (el borde) con el color negro
     self.dibujar_rectangulo(rect, COLOR_BORDE)
-    
+
     # Crea el rectángulo interior (cuerpo)
     # .inflate() reduce el rectángulo en el doble del grosor del borde
     cuerpo_rect = rect.inflate(-GROSOR_BORDE * 2, -GROSOR_BORDE * 2)
-    
+
     # Dibujar el cuerpo interior con el color original del bloque
     self.dibujar_rectangulo(cuerpo_rect, color)
 
@@ -256,10 +263,10 @@ def cargar_audio_y_fondo(self) -> None:
         level_num = int(level_num_str)
     except (ValueError, IndexError):
         level_num = 1  # Valor por defecto si el nombre no sigue el patrón
-    
+
     music_file = None
     background_file = None
-    
+
     if level_num in [1, 2]:
         music_file = "others/level_1-2.mp3"
         background_file = "others/background1-2.png"
@@ -269,34 +276,38 @@ def cargar_audio_y_fondo(self) -> None:
     elif level_num >= 5:
         music_file = "others/level_5.mp3"
         background_file = "others/background5.png"
-      
+
     self.background_img = None
     if background_file:
         try:
             # Carga la imagen
-            img = pygame.image.load(background_file).convert() 
-            
+            img = pygame.image.load(background_file).convert()
+
             # Redimensionar la imagen al tamaño de la pantalla
             self.background_img = pygame.transform.scale(
-                img, 
+                img,
                 (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
             )
         except pygame.error as e:
-            print(f"Advertencia: No se pudo cargar el fondo {background_file}. Error: {e}")
+            print(
+                f"Advertencia: No se pudo cargar el fondo {background_file}."
+                f" Error: {e}")
 
     if music_file:
         try:
             # Detiene la música actual si está sonando
-            pygame.mixer.music.stop() 
-            
+            pygame.mixer.music.stop()
+
             # Carga la nueva canción
             pygame.mixer.music.load(music_file)
-            
+
             # Establece volumen y reproduce en bucle
             pygame.mixer.music.set_volume(self.music_volume)
             pygame.mixer.music.play(loops=-1)
         except pygame.error as e:
-            print(f"Advertencia: No se pudo cargar la música {music_file}. Error: {e}")
+            print(
+                f"Advertencia: No se pudo cargar la música {music_file}."
+                f" Error: {e}")
 
 
 @arkanoid_method
@@ -307,8 +318,8 @@ def pantalla_fin(self, mensaje: str) -> None:
 
     clock = pygame.time.Clock()
 
-    game_over = (mensaje=="GAME OVER")
-    juego_completo = (mensaje=="¡JUEGO TERMINADO! ¡Gracias por jugar!")
+    game_over = (mensaje == "GAME OVER")
+    juego_completo = (mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!")
 
     # Crear los textos
     txt_mensaje = fuente.render(mensaje, True, (255, 255, 255))
@@ -320,51 +331,68 @@ def pantalla_fin(self, mensaje: str) -> None:
     ancho_btn = 240
     alto_btn = 50
     centro_x = self.SCREEN_WIDTH // 2
-    
-    next_rect = None 
-    retry_rect = None 
-    
+
+    next_rect = None
+    retry_rect = None
+
     pos_central_arriba = self.SCREEN_HEIGHT // 2 - 35
     pos_central_abajo = self.SCREEN_HEIGHT // 2 + 35
-    
-    pygame.mixer.music.stop() 
-    
+
+    pygame.mixer.music.stop()
+
     if game_over or juego_completo:
-        retry_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_arriba, ancho_btn, alto_btn)
-        quit_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_abajo, ancho_btn, alto_btn)
-    else: 
-        next_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_arriba, ancho_btn, alto_btn)
-        quit_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_abajo, ancho_btn, alto_btn)
-
-
+        retry_rect = pygame.Rect(
+            centro_x - ancho_btn // 2,
+            pos_central_arriba,
+            ancho_btn,
+            alto_btn)
+        quit_rect = pygame.Rect(
+            centro_x - ancho_btn // 2,
+            pos_central_abajo,
+            ancho_btn,
+            alto_btn)
+    else:
+        next_rect = pygame.Rect(
+            centro_x - ancho_btn // 2,
+            pos_central_arriba,
+            ancho_btn,
+            alto_btn)
+        quit_rect = pygame.Rect(
+            centro_x - ancho_btn // 2,
+            pos_central_abajo,
+            ancho_btn,
+            alto_btn)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 return
-            
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if retry_rect and retry_rect.collidepoint(event.pos):
                     # Reiniciar el juego
-                    reinicio_completo = (mensaje == "GAME OVER" or mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!")
+                    reinicio_completo = (
+                        mensaje == "GAME OVER" or
+                        mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!")
 
                     if mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!":
-                        self.level_path = self.level_path.with_name("level_1.txt")
+                        self.level_path = self.level_path.with_name(
+                            "level_1.txt")
                         self.cargar_nivel()
 
-                    # Reiniciar este nivel    
+                    # Reiniciar este nivel
                     self.preparar_entidades(reiniciar_score=reinicio_completo)
                     self.crear_bloques()
                     self.cargar_audio_y_fondo()
                     return
-                
+
                 if next_rect and next_rect.collidepoint(event.pos):
                     # Pasar al siguiente nivel directamente
                     actual = self.level_path
                     try:
                         n = int(actual.stem.split("_")[-1])
-                        siguiente = actual.with_name(f"level_{n+1}.txt")
+                        siguiente = actual.with_name(f"level_{n + 1}.txt")
                         if siguiente.exists():
                             self.level_path = siguiente
                             self.cargar_nivel()
@@ -373,12 +401,13 @@ def pantalla_fin(self, mensaje: str) -> None:
                             self.cargar_audio_y_fondo()
                         else:
                             # Fin de todos los niveles
-                            self.pantalla_fin("¡JUEGO TERMINADO! ¡Gracias por jugar!") 
+                            self.pantalla_fin(
+                                "¡JUEGO TERMINADO! ¡Gracias por jugar!")
                         return
-                    except:
+                    except BaseException:
                         print("Nombre de nivel no soportado.")
                         return
-                        
+
                 if quit_rect.collidepoint(event.pos):
                     # Quita el juego
                     self.running = False
@@ -389,12 +418,12 @@ def pantalla_fin(self, mensaje: str) -> None:
 
         # Posición base para el mensaje principal (ej: "¡HAS GANADO!")
         pos_y_mensaje = self.SCREEN_HEIGHT // 3
-        
+
         self.screen.blit(
             txt_mensaje,
-            (centro_x - txt_mensaje.get_width()//2, pos_y_mensaje)
+            (centro_x - txt_mensaje.get_width() // 2, pos_y_mensaje)
         )
-        
+
         # Botón Next level
         if next_rect:
             pygame.draw.rect(self.screen, (80, 80, 80), next_rect)
@@ -429,16 +458,15 @@ def run(self) -> None:
     self.crear_bloques()
     self.cargar_audio_y_fondo()
     self.running = True
-    
 
     while self.running:
         # Procesar eventos
         for event in self.iterar_eventos():
             if event.type == self.EVENT_QUIT:
                 self.running = False
-            elif event.type == self.EVENT_KEYDOWN and event.key == self.KEY_ESCAPE:
+            elif (event.type == self.EVENT_KEYDOWN and
+                  event.key == self.KEY_ESCAPE):
                 self.running = False
-        
 
         # Entrada del jugador
         self.procesar_input()
@@ -469,13 +497,14 @@ def main() -> None:
     parser.add_argument(
         "level",
         type=str,
-        help="Ruta al fichero de nivel (texto con # para bloques y . para huecos).",
+        help="Ruta al fichero de nivel "
+        "(texto con # para bloques y . para huecos).",
     )
     args = parser.parse_args()
 
     game = ArkanoidGame(args.level)
     game.run()
-    
+
 
 if __name__ == "__main__":
     main()
