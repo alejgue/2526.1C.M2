@@ -110,13 +110,19 @@ def actualizar_bola(self) -> None:
     # Mueve la bola según su velocidad.
     self.ball_pos += self.ball_velocity
     ball_rect = self.obtener_rect_bola()
-
-    # Comprueba colisiones con paredes, paleta y bloques.
-    if ball_rect.left <= 0 or ball_rect.right >= self.SCREEN_WIDTH:
+    # Gestiona colisiones con paredes, paleta y bloques.
+    
+    if ball_rect.left <= 0:
         self.ball_velocity.x *= -1
+        self.ball_pos.x = ball_rect.width / 2 + 1
+
+    elif ball_rect.right >= self.SCREEN_WIDTH:
+        self.ball_velocity.x *= -1
+        self.ball_pos.x = self.SCREEN_WIDTH - ball_rect.width / 2 - 1
 
     if ball_rect.top <= 0:
         self.ball_velocity.y *= -1
+        self.ball_pos.y = ball_rect.height / 2 + 1
 
     if ball_rect.top >= self.SCREEN_HEIGHT:
         self.lives -= 1
@@ -124,8 +130,18 @@ def actualizar_bola(self) -> None:
         return
 
     if ball_rect.colliderect(self.paddle) and self.ball_velocity.y > 0:
-        angulo = rnd.uniform(-70, 70)
+
+        self.ball_pos.y = self.paddle.top - ball_rect.height / 2 - 1
+        ball_rect = self.obtener_rect_bola()
+
+        distancia_relativa = (ball_rect.centerx - self.paddle.centerx) / (self.paddle.width / 2)
+        distancia_relativa = max(-1, min(1, distancia_relativa))
+
+        MAX_ANGULO = 60
+        angulo = distancia_relativa * MAX_ANGULO
+
         direccion = Vector2(0, -1).rotate(angulo)
+
         self.ball_velocity = direccion.normalize() * self.BALL_SPEED
 
     nuevos_bloques = []
@@ -137,15 +153,16 @@ def actualizar_bola(self) -> None:
         if not colision_bloque and ball_rect.colliderect(rect):
             self.ball_velocity.y *= -1
             self.score += self.BLOCK_POINTS[symbol]
+            colision_bloque = True
         else:
             nuevos_bloques.append(rect)
             nuevos_colores.append(color)
             nuevos_simbolos.append(symbol)
 
-    # Actualiza velocidad, puntuación y vidas según corresponda.
     self.blocks = nuevos_bloques
     self.block_colors = nuevos_colores
     self.block_symbols = nuevos_simbolos
+# Controla fin de nivel cuando no queden bloques y resta vidas si la bola cae.
 
     if self.lives <= 0:
         self.pantalla_fin("GAME OVER")
