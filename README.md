@@ -98,3 +98,69 @@ Número de vidas restantes en la posición (10, 40).
 
 Resultado:
 La pantalla muestra el juego completo: fondo personalizado o color sólido, todos los bloques activos con sus bordes, la paleta controlada por el jugador, la bola en movimiento, y los indicadores de puntuación y vidas siempre visibles.
+
+8. cargar_audio_y_fondo:
+Esta función añade música ambiental y fondos visuales específicos para cada nivel.
+
+Función:
+- Extrae el número del nivel desde el nombre del archivo (por ejemplo, level_3.txt → 3) utilizando .stem.split('_')[-1].
+- Asigna archivos de audio y fondo según el número de nivel:
+--Niveles 1-2: Música level_1-2.mp3 y fondo background1-2.png
+--Niveles 3-4: Música level_3-4.mp3 y fondo background3-4.png
+--Nivel 5+: Música level_5.mp3 y fondo background5.png
+- Intenta cargar la imagen correspondiente usando pygame.image.load(), la convierte con .convert() para optimizar el rendimiento, y la redimensiona al tamaño exacto de la pantalla (SCREEN_WIDTH x SCREEN_HEIGHT) con pygame.transform.scale(). Si falla, captura la excepción y muestra una advertencia, permitiendo que el juego continúe con el fondo de color sólido.
+- Carga de música: Detiene cualquier música que esté sonando con pygame.mixer.music.stop(), carga el nuevo archivo de audio con pygame.mixer.music.load(), establece el volumen definido (self.music_volume), e inicia la reproducción en bucle infinito (loops=-1). Si hay error, muestra advertencia y el juego continúa sin música.
+
+Resultado:
+Cada nivel tiene su propia ambientación visual y sonora.
+
+9. pantalla_fin
+Esta función gestiona las pantallas de finalización del juego, proporcionando diferentes opciones al jugador según el resultado obtenido.
+
+Función:
+- Crea fuentes de pygame para el mensaje principal (tamaño 60) y los botones (tamaño 40), inicializa un reloj para controlar los FPS, y detiene la música con pygame.mixer.music.stop().
+- Analiza el mensaje recibido para identificar tres estados posibles:
+--game_over = True si el mensaje es "GAME OVER"
+--juego_completo = True si el mensaje es "¡JUEGO TERMINADO! ¡Gracias por jugar!"
+--Nivel completado en cualquier otro caso
+
+- Renderizado de textos: Geera superficies de texto para el mensaje principal y tres botones posibles: "Next Level", "Retry" y "Quit".
+- Posicionamiento de botones: Calcula la posición central de la pantalla y crea rectángulos para los botones. La disposición varía según el estado:
+--Game Over o Juego Completo: Muestra botones "Retry" (arriba) y "Quit" (abajo)
+--Nivel completado: Muestra botones "Next Level" (arriba) y "Quit" (abajo)
+- Bucle de pantalla de fin: Entra en un bucle independiente que:
+- Evento de cierre de ventana: Si el usuario cierra la ventana, establece self.running = False y retorna.
+
+Resultado:
+El jugador recibe feedback visual claro sobre su progreso y puede elegir entre reintentar el nivel actual, avanzar al siguiente (si ganó), o salir del juego. 
+
+10. run
+Esta es la función principal del juego, implementando el bucle de juego clásico (game loop).
+
+Función:
+- Inicialización: Ejecuta en secuencia:
+
+self.inicializar_pygame(): Inicializa pygame, crea la ventana y el reloj de FPS.
+self.cargar_nivel(): Lee y valida el archivo de nivel.
+self.preparar_entidades(): Posiciona paleta y bola, reinicia puntuación y vidas.
+self.crear_bloques(): Genera los rectángulos de bloques según la cuadrícula.
+self.cargar_audio_y_fondo(): Carga música y fondo visual del nivel.
+Establece self.running = True para iniciar el bucle principal.
+
+
+- Bucle principal (while self.running:): Se ejecuta continuamente mientras el juego está activo:
+
+Procesamiento de eventos: Itera sobre todos los eventos de pygame:
+
+Si detecta EVENT_QUIT (cerrar ventana), establece self.running = False
+Si detecta EVENT_KEYDOWN con la tecla ESCAPE, también establece self.running = False
+
+
+- Input del jugador: Llama a self.procesar_input() para gestionar el movimiento de la paleta según las teclas presionadas.
+- Ejecuta self.actualizar_bola() que mueve la bola, resuelve todas las colisiones y verifica condiciones de fin de juego.
+- Renderizado: Invoca self.dibujar_escena() que pinta todos los elementos del juego en pantalla.
+Sincronización de pantalla: Llama a self.actualizar_pantalla() para hacer visible lo dibujado (equivalente a pygame.display.flip()).
+- Finalización: Una vez que self.running es False y el bucle termina, llama a self.finalizar_pygame() para cerrar pygame limpiamente y liberar recursos.
+
+Resultado:
+El juego funciona de manera fluida y estable, procesando entrada del usuario, actualizando la lógica del juego y renderizando gráficos a 60 FPS constantes, hasta que el jugador decide salir o completa/pierde todos los niveles.
