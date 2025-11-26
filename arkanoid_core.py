@@ -99,11 +99,13 @@ class ArkanoidGame:
 
         # Sonido y musica
         self.music_volume: float = 0.2
-        self.collision_sound: pygame.mixer.Sound | None = None
-        self.next_level_sound: pygame.mixer.Sound | None = None
-        self.game_start_sound: pygame.mixer.Sound | None = None
-        self.game_over_sound: pygame.mixer.Sound | None = None
-        self.game_won_sound: pygame.mixer.Sound | None = None
+        #self.event_sound_volume = 0.7
+        #self.sound_level_win = pygame.mixer.Sound("others/level_win.mp3") 
+        #self.sound_game_over = pygame.mixer.Sound("others/game_over.mp3") 
+        #self.sound_game_complete = pygame.mixer.Sound("others/game_complete.mp3")
+        #self.sound_level_win.set_volume(self.event_sound_volume) 
+        #self.sound_game_over.set_volume(self.event_sound_volume)
+        #self.sound_game_complete.set_volume(self.event_sound_volume)
 
     # ------------------------------------------------------------------ #
     # Métodos auxiliares ya implementados para el hito
@@ -167,6 +169,7 @@ class ArkanoidGame:
 
         if not self._font_small:
             self._font_small = pygame.font.Font(None, 26)
+            self._font_small.bold = True
         return self._font_small
 
     def dibujar_texto(self, texto: str, posicion: tuple[int, int], grande: bool = False) -> None:

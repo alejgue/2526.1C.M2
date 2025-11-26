@@ -11,39 +11,45 @@ import random as rnd
 # --------------------------------------------------------------------- #
 
 @arkanoid_method
-def cargar_nivel(self) -> list[str]:    #YOOOOOYOOOOO
+def cargar_nivel(self) -> list[str]:   
     """Lee el fichero de nivel y devuelve la cuadrícula como lista de filas."""
+    # Comprueba que `self.level_path` existe y es fichero.
     ruta_fichero_nivel = self.level_path
 
     if not ruta_fichero_nivel.is_file():
         mensaje = f"No se encuentra el archivo: {ruta_fichero_nivel}"
-        print(mensaje)  # Comprueba que `self.level_path` existe y es fichero.
+        print(mensaje)  
+
+    # Lee su contenido, filtra líneas vacías y valida que todas tienen el mismo ancho.
     with ruta_fichero_nivel.open("r", encoding="utf-8") as f:
-       texto_entero = f.read()  # Lee todo el contenido del archivo como una sola cadena 
-                                # y luego la divide
+       # Lee todo el contenido del archivo como una sola cadena
+       texto_entero = f.read()   
+       # Obtiene las lineas sin espacios y las separa
        lineas = [
            linea.strip() 
            for linea in texto_entero.splitlines() 
            if linea.strip()
-       ]  #Obtiene las lineas sin espacios y separados por l
-       longitudes = [len(linea) for linea in lineas]  # Comprueba el ancho de las lineas
+       ]  
+       # Comprueba el ancho de las lineas
+       longitudes = [len(linea) for linea in lineas]  
        if len(set(longitudes)) > 1:   
            raise ValueError("Las filas del nivel no tienen el mismo ancho")  
-    # Lee su contenido, filtra líneas vacías y valida que todas tienen el mismo ancho.
+    # Guarda el resultado en `self.layout` y devuélvelo.
     self.layout = lineas
     return self.layout
-    # Guarda el resultado en `self.layout` y devuélvelo.
+    
    
 
 @arkanoid_method
-def preparar_entidades(self) -> None:
+def preparar_entidades(self, reiniciar_score: bool = False) -> None:
     """Posiciona paleta y bola, y reinicia puntuación y vidas."""
     # - Ajusta el tamaño de `self.paddle` y céntrala usando `midbottom`.
     self.paddle = self.crear_rect(0, 0, *self.PADDLE_SIZE)
     self.paddle.midbottom = (self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT - self.PADDLE_OFFSET)
     
     # - Reinicia `self.score`, `self.lives` y `self.end_message`.
-    self.score = 0
+    if reiniciar_score:
+        self.score = 0
     self.lives = 3  
     self.end_message = ""
 
@@ -167,6 +173,8 @@ def actualizar_bola(self) -> None:
     if self.lives <= 0:
         self.pantalla_fin("GAME OVER")
 
+    if len(self.blocks) == 0:
+        self.pantalla_fin("¡Pasaste el Nivel!")
 @arkanoid_method
 def dibujar_bloque_con_borde(self, rect: pygame.Rect, color: tuple[int, int, int]) -> None:
     """Dibuja un bloque con un borde negro simple."""
@@ -215,25 +223,61 @@ def dibujar_escena(self) -> None:
         ancho = self.SCREEN_WIDTH // 2
         alto = self.SCREEN_HEIGHT // 2
         self.dibujar_texto(self.end_message, (ancho - 80, alto - 20), grande=True)
-        self.game_over_sound = pygame.mixer.Sound("others//Game_over.mp3")
+        self.game_over_sound = pygame.mixer.Sound("others/Game_over.mp3")
         self.game_over_sound.set_volume(100)
         pygame.mixer.music.stop()
         pygame.mixer.quit()
 
 @arkanoid_method
 def cargar_audio_y_fondo(self) -> None:
-    # Carga la imagen(fondo)
-    img = pygame.image.load("others//background1-2.png").convert() 
-        
-    # Redimensionar la imagen al tamaño de la pantalla
-    self.background_img = pygame.transform.scale(
-        img, 
-        (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
-    )
-    pygame.mixer.music.load("others//level_1-2.mp3")
-    pygame.mixer.music.set_volume(self.music_volume)
-    pygame.mixer.music.play(loops=-1)
-        #self.music_level_5 = pygame.mixer.music.load("level_5.mp3")
+    try:
+        # Extrae el número del nombre del archivo (ej: 'level_1.txt' -> 1)
+        level_num_str = self.level_path.stem.split('_')[-1]
+        level_num = int(level_num_str)
+    except (ValueError, IndexError):
+        level_num = 1 # Valor por defecto si el nombre no sigue el patrón
+    
+    music_file = None
+    background_file = None
+    
+    if level_num in [1, 2]:
+        music_file = "others/level_1-2.mp3"
+        background_file = "others/background1-2.png"
+    elif level_num in [3, 4]:
+        music_file = "others/level_3-4.mp3"
+        background_file = "others/background3-4.png"
+    elif level_num >= 5:
+        music_file = "others/level_5.mp3"
+        background_file = "others/background5.png"
+      
+    self.background_img = None
+    if background_file:
+        try:
+            # Carga la imagen
+            img = pygame.image.load(background_file).convert() 
+            
+            # Redimensionar la imagen al tamaño de la pantalla
+            self.background_img = pygame.transform.scale(
+                img, 
+                (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+            )
+        except pygame.error as e:
+            print(f"Advertencia: No se pudo cargar el fondo {background_file}. Error: {e}")
+            # Si falla, self.background_img se mantiene en None y se usa BACKGROUND_COLOR.
+
+    if music_file:
+        try:
+            # Detiene la música actual si está sonando
+            pygame.mixer.music.stop() 
+            
+            # Carga la nueva canción
+            pygame.mixer.music.load(music_file)
+            
+            # Establece volumen y reproduce en bucle
+            pygame.mixer.music.set_volume(self.music_volume)
+            pygame.mixer.music.play(loops=-1)
+        except pygame.error as e:
+            print(f"Advertencia: No se pudo cargar la música {music_file}. Error: {e}")
 
 
 @arkanoid_method
@@ -241,17 +285,42 @@ def pantalla_fin(self, mensaje: str) -> None:
     """Pantalla simple de fin: muestra mensaje, Retry y Next Level."""
     fuente = pygame.font.SysFont(None, 60)
     fuente_btn = pygame.font.SysFont(None, 40)
+    #fuente_score = pygame.font.SysFont(None, 40)
 
     clock = pygame.time.Clock()
 
+    game_over = (mensaje=="GAME OVER")
+
     # Crear los textos
     txt_mensaje = fuente.render(mensaje, True, (255, 255, 255))
-    txt_retry = fuente_btn.render("Retry", True, (255, 255, 255))
     txt_next = fuente_btn.render("Next Level", True, (255, 255, 255))
+    txt_retry = fuente_btn.render("Retry", True, (255, 255, 255))
+    txt_quit = fuente_btn.render("Quit", True, (255, 255, 255))
+
+    #txt_puntuacion = None
+    #if not game_over:
+    #    texto_score = f"PUNTUACIÓN: {self.score}"
+    #    txt_puntuacion = fuente_score.render(texto_score, True, (255, 255, 255))
 
     # Rectángulos de botones
-    retry_rect = pygame.Rect(self.SCREEN_WIDTH//2 - 120, self.SCREEN_HEIGHT//2, 240, 50)
-    next_rect = pygame.Rect(self.SCREEN_WIDTH//2 - 120, self.SCREEN_HEIGHT//2 + 70, 240, 50)
+    ancho_btn = 240
+    alto_btn = 50
+    centro_x = self.SCREEN_WIDTH // 2
+    
+    next_rect = None 
+    retry_rect = None 
+    
+    pos_central_arriba = self.SCREEN_HEIGHT // 2 - 35
+    pos_central_abajo = self.SCREEN_HEIGHT // 2 + 35
+    
+    if game_over:
+        retry_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_arriba, ancho_btn, alto_btn)
+        quit_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_abajo, ancho_btn, alto_btn)
+    else: 
+        next_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_arriba, ancho_btn, alto_btn)
+        quit_rect = pygame.Rect(centro_x - ancho_btn // 2, pos_central_abajo, ancho_btn, alto_btn)
+
+
 
     while True:
         for event in pygame.event.get():
@@ -260,13 +329,21 @@ def pantalla_fin(self, mensaje: str) -> None:
                 return
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if retry_rect.collidepoint(event.pos):
-                    # Reiniciar este nivel
-                    self.preparar_entidades()
-                    self.crear_bloques()
-                    return
+                if retry_rect and retry_rect.collidepoint(event.pos):
+                    # Reiniciar el juego
+                    reinicio_completo = (mensaje == "GAME OVER" or mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!")
 
-                if next_rect.collidepoint(event.pos):
+                    if mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!":
+                        self.level_path = self.level_path.with_name("level_1.txt")
+                        self.cargar_nivel()
+
+                    # Reiniciar este nivel    
+                    self.preparar_entidades(reiniciar_score=reinicio_completo)
+                    self.crear_bloques()
+                    self.cargar_audio_y_fondo()
+                    return
+                
+                if next_rect and next_rect.collidepoint(event.pos):
                     # Pasar al siguiente nivel directamente
                     actual = self.level_path
                     try:
@@ -277,29 +354,57 @@ def pantalla_fin(self, mensaje: str) -> None:
                             self.cargar_nivel()
                             self.preparar_entidades()
                             self.crear_bloques()
+                            self.cargar_audio_y_fondo()
                         else:
-                            print("No existe el siguiente nivel.")
+                            # Fin de todos los niveles
+                            self.pantalla_fin("¡JUEGO TERMINADO! ¡Gracias por jugar!") 
                         return
                     except:
                         print("Nombre de nivel no soportado.")
                         return
+                        
+                if quit_rect.collidepoint(event.pos):
+                    # Quita el juego
+                    self.running = False
+                    return
 
         # Fondo negro
         self.screen.fill((0, 0, 0))
 
-        # Mensaje centrado
+        # Posición base para el mensaje principal (ej: "¡HAS GANADO!")
+        pos_y_mensaje = self.SCREEN_HEIGHT // 3
+        
         self.screen.blit(
             txt_mensaje,
-            (self.SCREEN_WIDTH//2 - txt_mensaje.get_width()//2, self.SCREEN_HEIGHT//3)
+            (centro_x - txt_mensaje.get_width()//2, pos_y_mensaje)
         )
+        
+        # Dibujar la puntuación solo si no es Game Over
+        #if txt_puntuacion:
+        #    self.screen.blit(
+        #        txt_puntuacion,
+        #        (centro_x - txt_puntuacion.get_width()//2, pos_y_mensaje + 60) 
+        #    )
+        
+        # Botón Next level
+        if next_rect:
+            pygame.draw.rect(self.screen, (80, 80, 80), next_rect)
+            next_text_x = next_rect.centerx - txt_next.get_width() // 2
+            next_text_y = next_rect.centery - txt_next.get_height() // 2
+            self.screen.blit(txt_next, (next_text_x, next_text_y))
 
         # Botón Retry
-        pygame.draw.rect(self.screen, (80, 80, 80), retry_rect)
-        self.screen.blit(txt_retry, (retry_rect.x + 70, retry_rect.y + 10))
+        if retry_rect:
+            pygame.draw.rect(self.screen, (80, 80, 80), retry_rect)
+            retry_text_x = retry_rect.centerx - txt_retry.get_width() // 2
+            retry_text_y = retry_rect.centery - txt_retry.get_height() // 2
+            self.screen.blit(txt_retry, (retry_text_x, retry_text_y))
 
-        # Botón Next Level
-        pygame.draw.rect(self.screen, (80, 80, 80), next_rect)
-        self.screen.blit(txt_next, (next_rect.x + 40, next_rect.y + 10))
+        # Botón Quit
+        pygame.draw.rect(self.screen, (80, 80, 80), quit_rect)
+        quit_text_x = quit_rect.centerx - txt_quit.get_width() // 2
+        quit_text_y = quit_rect.centery - txt_quit.get_height() // 2
+        self.screen.blit(txt_quit, (quit_text_x, quit_text_y))
 
         pygame.display.flip()
         clock.tick(30)
