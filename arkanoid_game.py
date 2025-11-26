@@ -268,7 +268,7 @@ def pantalla_fin(self, mensaje: str) -> None:
     """Pantalla simple de fin: muestra mensaje, Retry y Next Level."""
     fuente = pygame.font.SysFont(None, 60)
     fuente_btn = pygame.font.SysFont(None, 40)
-    fuente_score = pygame.font.SysFont(None, 40)
+    #fuente_score = pygame.font.SysFont(None, 40)
 
     clock = pygame.time.Clock()
 
@@ -340,7 +340,7 @@ def pantalla_fin(self, mensaje: str) -> None:
                             self.cargar_audio_y_fondo()
                         else:
                             # Fin de todos los niveles
-                            self.pantalla_fin = "¡JUEGO TERMINADO! ¡Gracias por jugar!" 
+                            self.pantalla_fin("¡JUEGO TERMINADO! ¡Gracias por jugar!") 
                         return
                     except:
                         print("Nombre de nivel no soportado.")
