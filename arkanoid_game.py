@@ -13,37 +13,43 @@ import random as rnd
 @arkanoid_method
 def cargar_nivel(self) -> list[str]:   
     """Lee el fichero de nivel y devuelve la cuadrícula como lista de filas."""
+    # Comprueba que `self.level_path` existe y es fichero.
     ruta_fichero_nivel = self.level_path
 
     if not ruta_fichero_nivel.is_file():
         mensaje = f"No se encuentra el archivo: {ruta_fichero_nivel}"
-        print(mensaje)  # Comprueba que `self.level_path` existe y es fichero.
+        print(mensaje)  
+
+    # Lee su contenido, filtra líneas vacías y valida que todas tienen el mismo ancho.
     with ruta_fichero_nivel.open("r", encoding="utf-8") as f:
-       texto_entero = f.read()  # Lee todo el contenido del archivo como una sola cadena 
-                                # y luego la divide
+       # Lee todo el contenido del archivo como una sola cadena
+       texto_entero = f.read()   
+       # Obtiene las lineas sin espacios y las separa
        lineas = [
            linea.strip() 
            for linea in texto_entero.splitlines() 
            if linea.strip()
-       ]  #Obtiene las lineas sin espacios y separados por l
-       longitudes = [len(linea) for linea in lineas]  # Comprueba el ancho de las lineas
+       ]  
+       # Comprueba el ancho de las lineas
+       longitudes = [len(linea) for linea in lineas]  
        if len(set(longitudes)) > 1:   
            raise ValueError("Las filas del nivel no tienen el mismo ancho")  
-    # Lee su contenido, filtra líneas vacías y valida que todas tienen el mismo ancho.
+    # Guarda el resultado en `self.layout` y devuélvelo.
     self.layout = lineas
     return self.layout
-    # Guarda el resultado en `self.layout` y devuélvelo.
+    
    
 
 @arkanoid_method
-def preparar_entidades(self) -> None:
+def preparar_entidades(self, reiniciar_score: bool = False) -> None:
     """Posiciona paleta y bola, y reinicia puntuación y vidas."""
     # - Ajusta el tamaño de `self.paddle` y céntrala usando `midbottom`.
     self.paddle = self.crear_rect(0, 0, *self.PADDLE_SIZE)
     self.paddle.midbottom = (self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT - self.PADDLE_OFFSET)
     
     # - Reinicia `self.score`, `self.lives` y `self.end_message`.
-    self.score = 0
+    if reiniciar_score:
+        self.score = 0
     self.lives = 3  
     self.end_message = ""
 
@@ -274,10 +280,10 @@ def pantalla_fin(self, mensaje: str) -> None:
     txt_retry = fuente_btn.render("Retry", True, (255, 255, 255))
     txt_quit = fuente_btn.render("Quit", True, (255, 255, 255))
 
-    txt_puntuacion = None
-    if not game_over:
-        texto_score = f"PUNTUACIÓN: {self.score}"
-        txt_puntuacion = fuente_score.render(texto_score, True, (255, 255, 255))
+    #txt_puntuacion = None
+    #if not game_over:
+    #    texto_score = f"PUNTUACIÓN: {self.score}"
+    #    txt_puntuacion = fuente_score.render(texto_score, True, (255, 255, 255))
 
     # Rectángulos de botones
     ancho_btn = 240
@@ -307,8 +313,15 @@ def pantalla_fin(self, mensaje: str) -> None:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if retry_rect and retry_rect.collidepoint(event.pos):
-                    # Reiniciar este nivel
-                    self.preparar_entidades()
+                    # Reiniciar el juego
+                    reinicio_completo = (mensaje == "GAME OVER" or mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!")
+
+                    if mensaje == "¡JUEGO TERMINADO! ¡Gracias por jugar!":
+                        self.level_path = self.level_path.with_name("level_1.txt")
+                        self.cargar_nivel()
+
+                    # Reiniciar este nivel    
+                    self.preparar_entidades(reiniciar_score=reinicio_completo)
                     self.crear_bloques()
                     self.cargar_audio_y_fondo()
                     return
@@ -327,11 +340,12 @@ def pantalla_fin(self, mensaje: str) -> None:
                             self.cargar_audio_y_fondo()
                         else:
                             # Fin de todos los niveles
-                            self.end_message = "¡JUEGO TERMINADO! ¡Gracias por jugar!" 
+                            self.pantalla_fin = "¡JUEGO TERMINADO! ¡Gracias por jugar!" 
                         return
                     except:
                         print("Nombre de nivel no soportado.")
                         return
+                        
                 if quit_rect.collidepoint(event.pos):
                     # Quita el juego
                     self.running = False
@@ -349,11 +363,11 @@ def pantalla_fin(self, mensaje: str) -> None:
         )
         
         # Dibujar la puntuación solo si no es Game Over
-        if txt_puntuacion:
-            self.screen.blit(
-                txt_puntuacion,
-                (centro_x - txt_puntuacion.get_width()//2, pos_y_mensaje + 60) # 60 píxeles debajo del mensaje
-            )
+        #if txt_puntuacion:
+        #    self.screen.blit(
+        #        txt_puntuacion,
+        #        (centro_x - txt_puntuacion.get_width()//2, pos_y_mensaje + 60) 
+        #    )
         
         # Botón Next level
         if next_rect:
