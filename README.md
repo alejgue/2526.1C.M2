@@ -1,4 +1,5 @@
-1. cargar_nivel:
+**1. cargar_nivel:**
+
 Esta función se encarga de leer el archivo de nivel indicado en self.level_path y transformarlo en una cuadrícula válida para el juego.
 
 Función:
@@ -11,7 +12,8 @@ Función:
 Resultado:
 El nivel queda representado internamente como una lista de cadenas, donde cada carácter define un tipo de bloque o una celda vacía.
 
-2. preparar_entidades:
+**2. preparar_entidades:**
+
 Esta función inicializa los elementos principales del juego antes de comenzar la partida.
 
 Función:
@@ -23,7 +25,8 @@ Función:
 Resultado:
 El juego queda en estado inicial: paleta centrada, bola preparada para salir y contador de puntos y vidas reiniciado.
 
-3. crear_bloques:
+**3. crear_bloques:**
+
 Esta función analiza la cuadrícula cargada previamente y genera los bloques que se renderizarán en pantalla.
 
 Función:
@@ -38,7 +41,8 @@ Función:
 Resultado:
 Los bloques quedan generados y listos para ser dibujados y colisionados durante el juego.
 
-4. procesar_input:
+**4. procesar_input:**
+
 Esta función gestiona la entrada del usuario para controlar el movimiento de la paleta.
 
 Función:
@@ -52,7 +56,8 @@ Función:
 Resultado:
 La paleta se mueve a la izquierda o a la derecha solo cuando el usuario mantiene pulsadas las teclas correspondientes, y nunca puede salirse de los límites de la pantalla.
 
-5. actualizar_bola:
+**5. actualizar_bola:**
+
 Esta función se encarga del movimiento de la bola y todas las colisiones que se producen durante la partida.
 
 Función:
@@ -72,7 +77,8 @@ Función:
 Resultado:
 La bola se mueve de forma fluida, rebota en todas las superficies, destruye bloques al impactar y se detecta las condiciones de victoria o derrota.
 
-6. dibujar_bloque_con_borde:
+**6. dibujar_bloque_con_borde:**
+
 Esta función mejora la presentación visual de los bloques añadiéndoles un borde negro que los hace más definidos y atractivos.
 
 Función:
@@ -84,7 +90,8 @@ Función:
 Resultado:
 Cada bloque se renderiza con un borde negro de 3 píxeles que lo rodea completamente
 
-7. dibujar_escena
+**7. dibujar_escena**
+
 Esta función pinta cada elemento en el orden correcto para que se visualice adecuadamente.
 
 Función:
@@ -99,7 +106,8 @@ Número de vidas restantes en la posición (10, 40).
 Resultado:
 La pantalla muestra el juego completo: fondo personalizado o color sólido, todos los bloques activos con sus bordes, la paleta controlada por el jugador, la bola en movimiento, y los indicadores de puntuación y vidas siempre visibles.
 
-8. cargar_audio_y_fondo:
+**8. cargar_audio_y_fondo:**
+
 Esta función añade música ambiental y fondos visuales específicos para cada nivel.
 
 Función:
@@ -114,7 +122,8 @@ Función:
 Resultado:
 Cada nivel tiene su propia ambientación visual y sonora.
 
-9. pantalla_fin
+**9. pantalla_fin**
+
 Esta función gestiona las pantallas de finalización del juego, proporcionando diferentes opciones al jugador según el resultado obtenido.
 
 Función:
@@ -134,7 +143,8 @@ Función:
 Resultado:
 El jugador recibe feedback visual claro sobre su progreso y puede elegir entre reintentar el nivel actual, avanzar al siguiente (si ganó), o salir del juego. 
 
-10. run
+**10. run**
+
 Esta es la función principal del juego, implementando el bucle de juego clásico (game loop).
 
 Función:
