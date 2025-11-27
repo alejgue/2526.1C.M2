@@ -34,9 +34,9 @@ Función:
 - Recorre cada fila y columna de self.layout.
 - Ignora el carácter . y valida que no existan símbolos no reconocidos.
 - Para cada símbolo de bloque (#, @, %):--Calcula su posición en pantalla mediante self.calcular_posicion_bloque().
---Añade el rectángulo resultante a self.blocks.
---Añade su color correspondiente a self.block_colors.
---Registra el símbolo en self.block_symbols para gestionar la puntuación.
+    - Añade el rectángulo resultante a self.blocks.
+    - Añade su color correspondiente a self.block_colors.
+    - Registra el símbolo en self.block_symbols para gestionar la puntuación.
 
 Resultado:
 Los bloques quedan generados y listos para ser dibujados y colisionados durante el juego.
@@ -48,8 +48,8 @@ Esta función gestiona la entrada del usuario para controlar el movimiento de la
 Función:
 - Obtiene el estado del teclado mediante self.obtener_estado_teclas().
 - Detecta la pulsación de las teclas de movimiento:
---Izquierda: KEY_LEFT o KEY_A.
---Derecha: KEY_RIGHT o KEY_D.
+    - Izquierda: KEY_LEFT o KEY_A.
+    - Derecha: KEY_RIGHT o KEY_D.
 - Actualiza la posición horizontal de la paleta utilizando self.PADDLE_SPEED.
 - Aplica límites para evitar que la paleta pueda salir de la pantalla.
 
@@ -66,10 +66,10 @@ Función:
 - Colisión con techo: Si la bola golpea la parte superior de la pantalla, invierte su componente vertical (self.ball_velocity.y *= -1) y reajusta su posición.
 - Caída de la bola: Cuando la bola cae por debajo de la pantalla (ball_rect.top >= self.SCREEN_HEIGHT), resta una vida, reinicia la bola sobre la paleta.
 - Colisión con la paleta: Verifica si la bola impacta con la paleta mientras desciende (self.ball_velocity.y > 0). En caso afirmativo:
--- Reposiciona la bola justo encima de la paleta para evitar que atraviese.
--- Calcula la distancia relativa del punto de impacto respecto al centro de la paleta.
--- Aplica un ángulo de rebote que varía según dónde golpee la bola
--- Multiplica  self.BALL_SPEED para mantener velocidad constante.
+    - Reposiciona la bola justo encima de la paleta para evitar que atraviese.
+    - Calcula la distancia relativa del punto de impacto respecto al centro de la paleta.
+    - Aplica un ángulo de rebote que varía según dónde golpee la bola
+    - Multiplica  self.BALL_SPEED para mantener velocidad constante.
 - Colisión con bloques: Recorre todos los bloques activos comprobando colisiones
 - Si las vidas llegan a cero, establece el mensaje "GAME OVER" y llama a self.pantalla_fin().
 - Si no quedan bloques en pantalla, determina el mensaje apropiado: si es el último nivel (level_5.txt), muestra "¡JUEGO TERMINADO! ¡Gracias por jugar!", de lo contrario "¡Pasaste el Nivel!", y llama a self.pantalla_fin().
@@ -113,9 +113,9 @@ Esta función añade música ambiental y fondos visuales específicos para cada 
 Función:
 - Extrae el número del nivel desde el nombre del archivo (por ejemplo, level_3.txt → 3) utilizando .stem.split('_')[-1].
 - Asigna archivos de audio y fondo según el número de nivel:
---Niveles 1-2: Música level_1-2.mp3 y fondo background1-2.png
---Niveles 3-4: Música level_3-4.mp3 y fondo background3-4.png
---Nivel 5+: Música level_5.mp3 y fondo background5.png
+    - Niveles 1-2: Música level_1-2.mp3 y fondo background1-2.png
+    - Niveles 3-4: Música level_3-4.mp3 y fondo background3-4.png
+    - Nivel 5+: Música level_5.mp3 y fondo background5.png
 - Intenta cargar la imagen correspondiente usando pygame.image.load(), la convierte con .convert() para optimizar el rendimiento, y la redimensiona al tamaño exacto de la pantalla (SCREEN_WIDTH x SCREEN_HEIGHT) con pygame.transform.scale(). Si falla, captura la excepción y muestra una advertencia, permitiendo que el juego continúe con el fondo de color sólido.
 - Carga de música: Detiene cualquier música que esté sonando con pygame.mixer.music.stop(), carga el nuevo archivo de audio con pygame.mixer.music.load(), establece el volumen definido (self.music_volume), e inicia la reproducción en bucle infinito (loops=-1). Si hay error, muestra advertencia y el juego continúa sin música.
 
@@ -129,14 +129,14 @@ Esta función gestiona las pantallas de finalización del juego, proporcionando 
 Función:
 - Crea fuentes de pygame para el mensaje principal (tamaño 60) y los botones (tamaño 40), inicializa un reloj para controlar los FPS, y detiene la música con pygame.mixer.music.stop().
 - Analiza el mensaje recibido para identificar tres estados posibles:
---game_over = True si el mensaje es "GAME OVER"
---juego_completo = True si el mensaje es "¡JUEGO TERMINADO! ¡Gracias por jugar!"
---Nivel completado en cualquier otro caso
+    - game_over = True si el mensaje es "GAME OVER"
+    - juego_completo = True si el mensaje es "¡JUEGO TERMINADO! ¡Gracias por jugar!"
+    - Nivel completado en cualquier otro caso
 
 - Renderizado de textos: Geera superficies de texto para el mensaje principal y tres botones posibles: "Next Level", "Retry" y "Quit".
 - Posicionamiento de botones: Calcula la posición central de la pantalla y crea rectángulos para los botones. La disposición varía según el estado:
---Game Over o Juego Completo: Muestra botones "Retry" (arriba) y "Quit" (abajo)
---Nivel completado: Muestra botones "Next Level" (arriba) y "Quit" (abajo)
+    - Game Over o Juego Completo: Muestra botones "Retry" (arriba) y "Quit" (abajo)
+    - Nivel completado: Muestra botones "Next Level" (arriba) y "Quit" (abajo)
 - Bucle de pantalla de fin: Entra en un bucle independiente que:
 - Evento de cierre de ventana: Si el usuario cierra la ventana, establece self.running = False y retorna.
 
